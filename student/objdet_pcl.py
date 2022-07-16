@@ -14,6 +14,7 @@
 import cv2
 import numpy as np
 import torch
+import zlib
 
 # add project directory to python path to enable relative imports
 import os
@@ -54,26 +55,46 @@ def show_pcl(pcl):
 # visualize range image
 def show_range_image(frame, lidar_name):
 
-    ####### ID_S1_EX1 START #######     
+    ####### ID_S1_EX1 START #######
     #######
     print("student task ID_S1_EX1")
 
     # step 1 : extract lidar data and range image for the roof-mounted lidar
-    
+    # @note: Code reference taken from "Visualizing the Intensity Channel" section
+    lidar = [obj for obj in frame.lasers if obj.name == lidar_name][0]
+    range_img = lidar.ri_return1.range_image_compressed
+    if len(range_img) > 0:
+        ri = dataset_pb2.MatrixFloat()
+        ri.ParseFromString(zlib.decompress(range_img))
+        ri = np.array(ri.data).reshape(ri.shape.dims)
+
     # step 2 : extract the range and the intensity channel from the range image
-    
-    # step 3 : set values <0 to zero
-    
+    # @note: Rest of the code referenced from "Further Range Images Examples" section
+    ri_range = ri[:, :, 0]
+    ri_intensity = ri[:, :, 1]
+
+    # step 3 : set values < 0 to zero
+    ri_range[ri_range < 0] = 0.0
+
     # step 4 : map the range channel onto an 8-bit scale and make sure that the full range of values is appropriately considered
-    
+    ri_range = (ri_range * 255) / (np.amax(ri_range) - np.amin(ri_range))
+    img_range = ri_range.astype(np.uint8)
+
     # step 5 : map the intensity channel onto an 8-bit scale and normalize with the difference between the 1- and 99-percentile to mitigate the influence of outliers
-    
+    ri_intensity = (ri_intensity * 255) / (np.percentile(ri_intensity, 99) - np.percentile(ri_intensity, 1))
+    img_intensity = ri_intensity.astype(np.uint8)
+
     # step 6 : stack the range and intensity image vertically using np.vstack and convert the result to an unsigned 8-bit integer
-    
-    img_range_intensity = [] # remove after implementing all steps
+    img_range_intensity = np.vstack((img_range, img_intensity))
+
+    # Crop range image to +/- 90 degrees left and right of forward-facing x-axis
+    deg90 = int(img_range_intensity.shape[1] / 4)
+    ri_center = int(img_range_intensity.shape[1] / 2)
+    img_range_intensity = img_range_intensity[:, ri_center - deg90: ri_center + deg90]
+
     #######
-    ####### ID_S1_EX1 END #######     
-    
+    ####### ID_S1_EX1 END #######
+
     return img_range_intensity
 
 

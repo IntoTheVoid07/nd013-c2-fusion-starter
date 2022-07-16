@@ -1,0 +1,5 @@
+dataset
+results
+venv*
+tools/objdet_models/**/pretrained
+__pycache__
