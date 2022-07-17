@@ -34,23 +34,44 @@ import misc.objdet_tools as tools
 # visualize lidar point-cloud
 def show_pcl(pcl):
 
-    ####### ID_S1_EX2 START #######     
+    ####### ID_S1_EX2 START #######
     #######
     print("student task ID_S1_EX2")
 
+    def right_arrow_close_callback(vis):
+        """
+        When the right arrow key is hit, exit the Open3d visual
+        """
+        vis.destroy_window()
+
+    def spacebar_cycler_callback(vis):
+        """
+        When the spacebar is hit, load the next frame visual
+        """
+        vis.close()
+
     # step 1 : initialize open3d with key callback and create window
-    
+    vis = o3d.visualization.VisualizationWithKeyCallback()
+    vis.create_window()
+
     # step 2 : create instance of open3d point-cloud class
+    pcd = o3d.geometry.PointCloud()
 
     # step 3 : set points in pcd instance by converting the point-cloud into 3d vectors (using open3d function Vector3dVector)
+    pcd.points = o3d.utility.Vector3dVector(pcl[:,:3])
 
     # step 4 : for the first frame, add the pcd instance to visualization using add_geometry; for all other frames, use update_geometry instead
-    
+    vis.add_geometry(pcd)
+
     # step 5 : visualize point cloud and keep window open until right-arrow is pressed (key-code 262)
+    # If the right arrow key is hit, exit showing pcl
+    vis.register_key_callback(262, right_arrow_close_callback)
+    vis.register_key_callback(32, spacebar_cycler_callback)
+    vis.run()
 
     #######
-    ####### ID_S1_EX2 END #######     
-       
+    ####### ID_S1_EX2 END #######
+
 
 # visualize range image
 def show_range_image(frame, lidar_name):
@@ -191,5 +212,3 @@ def bev_from_pcl(lidar_pcl, configs):
     bev_maps = torch.from_numpy(bev_maps)  # create tensor from birds-eye view
     input_bev_maps = bev_maps.to(configs.device, non_blocking=True).float()
     return input_bev_maps
-
-
