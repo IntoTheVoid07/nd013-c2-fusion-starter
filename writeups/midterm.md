@@ -1,5 +1,9 @@
 # Sensor Fusion - 3D Object Detection
 
+This midterm project focused on object detection using measurements from LiDAR and camera data. The LiDAR data was used to create birds-eye view (BEV) perspectives of 3D point-clouds. In the last section, performance metrics (precision and recall) were used to evaluate the performance of the detection algorithm.
+
+All code associated with ID_S<number>_EX<number> sections can be found in the student directory (objdet_detect.py, objdet_eval.py, objdet_pcl.py).
+
 ## Section 1: Compute LiDAR Point-Cloud from Range Image
 
 ### ID_S1_EX1 - Visualize range image channels
