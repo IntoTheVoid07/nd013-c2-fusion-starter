@@ -12,14 +12,15 @@
 
 # imports
 import numpy as np
+import misc.params as params
 
 # add project directory to python path to enable relative imports
 import os
 import sys
 PACKAGE_PARENT = '..'
-SCRIPT_DIR = os.path.dirname(os.path.realpath(os.path.join(os.getcwd(), os.path.expanduser(__file__))))
+SCRIPT_DIR = os.path.dirname(os.path.realpath(os.path.join(os.getcwd(),
+                             os.path.expanduser(__file__))))
 sys.path.append(os.path.normpath(os.path.join(SCRIPT_DIR, PACKAGE_PARENT)))
-import misc.params as params
 
 
 class Filter:
@@ -34,7 +35,8 @@ class Filter:
         # Step 1: implement and return system matrix F
         ############
         dt = self._delta_time
-        # Reference for 6D matrix: https://knowledge.udacity.com/questions/794594
+        # Reference for 6D matrix:
+        #   https://knowledge.udacity.com/questions/794594
         return np.matrix([[1, 0, 0, dt, 0, 0],  # x
                           [0, 1, 0, 0, dt, 0],  # y
                           [0, 0, 1, 0, 0, dt],  # z
@@ -44,7 +46,7 @@ class Filter:
 
         ############
         # END student code
-        ############ 
+        ############
 
     def Q(self):
         ############
@@ -56,7 +58,8 @@ class Filter:
         q1 = dt * q
         q2 = ((dt**2) / 2) * q
         q3 = ((dt**3) / 3) * q
-        # Reference for 6D matrix: https://knowledge.udacity.com/questions/794594
+        # Reference for 6D matrix:
+        #   https://knowledge.udacity.com/questions/794594
         return np.matrix([[q3, 0, 0, q2, 0, 0],
                           [0, q3, 0, 0, q2, 0],
                           [0, 0, q3, 0, 0, q2],
@@ -90,9 +93,9 @@ class Filter:
         gamma = self.gamma(track, meas)  # residual
         S = self.S(track, meas, H)  # Covariance of residual
         K = track.P * H.transpose() * np.linalg.inv(S)  # Kalman gain
-        track.set_x(track.x + (K * gamma))  # Update state
+        track.set_x(track.x + K * gamma)  # Update state
         I = np.identity(self._dim_state)
-        track.set_P(I - (K * H) * track.P)  # covariance update
+        track.set_P((I - K * H) * track.P)  # covariance update
 
         ############
         # END student code
@@ -115,7 +118,7 @@ class Filter:
         # Step 1: calculate and return covariance of residual S
         ############
 
-        return ((H * track.P * H.transpose()) + meas.R)
+        return (H * track.P * H.transpose() + meas.R)
 
         ############
         # END student code
