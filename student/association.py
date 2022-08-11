@@ -113,7 +113,7 @@ class Association:
         H = meas.sensor.get_H(track.x)
         gamma = KF.gamma(track, meas)
         S = KF.S(track, meas, H)
-        return gamma.transpose() * np.linalg.inv(S) * gamma
+        return gamma.transpose() * S.I * gamma
 
         ############
         # END student code
@@ -124,8 +124,8 @@ class Association:
         self.associate(manager.track_list, meas_list, KF)
 
         # update associated tracks with measurements
-        while (self.association_matrix.shape[0] > 0) and \
-              (self.association_matrix.shape[1] > 0):
+        while self.association_matrix.shape[0] > 0 and \
+              self.association_matrix.shape[1] > 0:
             # search for next association between a track and a measurement
             ind_track, ind_meas = self.get_closest_track_and_meas()
             if np.isnan(ind_track):
